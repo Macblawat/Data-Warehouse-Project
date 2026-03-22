@@ -1,4 +1,5 @@
 University Data Warehouse Project
+
 This is a full end-to-end data warehouse project I built for the sake of the Unviversity and it was built in a pair. It covers everything from the initial data generation to the final Power BI dashboard.
 
 1. Generating the Data
