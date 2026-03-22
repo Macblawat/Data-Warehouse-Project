@@ -1,0 +1,9 @@
+use university;
+DROP TABLE IF EXISTS Grades;
+DROP TABLE IF EXISTS Student;
+DROP TABLE IF EXISTS SubjectInCertainSemester;
+DROP TABLE IF EXISTS UniversityTeacher;
+DROP TABLE IF EXISTS Major;
+DROP TABLE IF EXISTS Department;
+DROP TABLE IF EXISTS Faculty;
+DROP TABLE IF EXISTS [Subject];

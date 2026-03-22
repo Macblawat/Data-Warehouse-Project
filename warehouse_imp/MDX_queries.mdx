@@ -1,0 +1,138 @@
+-- 1. Compare the satisfaction levels between different departments in the last 2 years.
+SELECT 
+  NON EMPTY { [Measures].[Satisfaction_level] } ON COLUMNS,
+
+  NON EMPTY {
+    (
+      [Major].[Major Name].[Major Name].ALLMEMBERS 
+      * 
+     { [Time].[Year].[Year].[2023], [Time].[Year].[Year].[2024] }
+    )
+  } 
+  DIMENSION PROPERTIES MEMBER_CAPTION, MEMBER_UNIQUE_NAME ON ROWS
+FROM [Warehouse Imp];
+
+-- 2. Do better paid teachers have better approval ratings in the last 2 years?
+ SELECT 
+ NON EMPTY { [Measures].[Approval_rating] } ON COLUMNS, 
+ NON EMPTY { 
+ ([Lecturer].[Salary Range].[Salary Range].ALLMEMBERS 
+ * 
+ { [Time].[Time_hierarchy].[Year].[2023], [Time].[Time_hierarchy].[Year].[2024] }
+ ) 
+ } DIMENSION PROPERTIES MEMBER_CAPTION, MEMBER_UNIQUE_NAME ON ROWS 
+ FROM [Warehouse Imp];
+
+
+ 
+ -- 3. Compare the approval ratings of lecturers in different age groups in the last 2 years.
+ SELECT 
+ NON EMPTY {
+ [Measures].[Approval_rating] } 
+ ON COLUMNS, NON EMPTY { 
+ (
+  [Lecturer].[Age Category].[Age Category].ALLMEMBERS 
+ * 
+ { [Time].[Time_hierarchy].[Year].[2023], [Time].[Time_hierarchy].[Year].[2024] }
+ ) 
+ } DIMENSION PROPERTIES MEMBER_CAPTION, MEMBER_UNIQUE_NAME ON ROWS 
+ FROM [Warehouse Imp];
+
+ -- 4.Compare the approval ratings of lecturers in different age groups in the last 2 years
+WITH 
+MEMBER [Measures].[Year] AS
+  [Time].[Year].CurrentMember.Parent.Name
+
+SELECT
+  NON EMPTY 
+    { 
+      [Measures].[Year],
+      [Measures].[Satisfaction_level], 
+      [Measures].[number_of_subjects] 
+    } ON COLUMNS,
+
+  NON EMPTY 
+    CrossJoin(
+      Filter(
+        [Time].[Semester].[Semester].Members,
+        [Time].[Year].CurrentMember.Parent.Name = '2023'
+        OR 
+        [Time].[Year].CurrentMember.Parent.Name = '2024'
+      ),
+      [Lecturer].[Name And Surname].[Name And Surname].Members
+    ) ON ROWS
+
+FROM [Warehouse Imp]
+-- 5. Rank bottom 20 subjects with the lowest satisfaction levels in the students surveys and thus might have lowered the overall satisfaction in the last 2 years.
+WITH 
+SET [Bottom20_2023] AS
+    BottomCount(
+        [Subject].[Subject_name_hier].Members,
+        20,
+        ([Measures].[Satisfaction_level], [Time].[Year].[2023])
+    )
+SET [Bottom20_2024] AS
+    BottomCount(
+        [Subject].[Subject_name_hier].Members,
+        20,
+        ([Measures].[Satisfaction_level], [Time].[Year].[2024])
+    )
+
+SET [SubjectsUnion] AS
+    Generate(
+        {[Bottom20_2023], [Bottom20_2024]},
+        {[Subject].[Subject_name_hier].CurrentMember}
+    )
+SELECT 
+{
+    ([Measures].[Satisfaction_level], [Time].[Year].[2023]),
+    ([Measures].[Satisfaction_level], [Time].[Year].[2024])
+} ON COLUMNS,
+
+[SubjectsUnion] ON ROWS
+
+FROM [Warehouse Imp]
+
+
+SELECT 
+  NON EMPTY { [Measures].[Average_difficulty] } ON COLUMNS,
+
+  NON EMPTY {
+    (
+      [Time].[Time_hierarchy].[Semester].ALLMEMBERS 
+      * 
+     { [Time].[Time_hierarchy].[Year].[2023], [Time].[Time_hierarchy].[Year].[2024] }
+    )
+  } 
+  DIMENSION PROPERTIES MEMBER_CAPTION, MEMBER_UNIQUE_NAME ON ROWS
+
+
+
+
+FROM [Warehouse Imp];
+
+SELECT 
+  NON EMPTY { [Measures].[Satisfaction] } ON COLUMNS,  NON EMPTY 
+    { [Time].[Time_hierarchy].[Year].[2023], [Time].[Time_hierarchy].[Year].[2024]} ON ROWS
+
+  FROM [Warehouse Imp]
+
+  SELECT 
+  NON EMPTY { [Measures].[Satisfaction] } ON COLUMNS,
+
+  NON EMPTY {
+      [Subject].[Subject Name].[Subject Name].ALLMEMBERS 
+  } ON ROWS
+FROM [Warehouse Imp];
+
+ SELECT 
+ NON EMPTY { [Measures].[Satisfaction] } ON COLUMNS, 
+ NON EMPTY { 
+     (
+       [Major].[Major Name].[Major Name].ALLMEMBERS 
+      * 
+     { [Lecturer].[Name And Surname].[Name And Surname] }
+    ) }  ON ROWS 
+ FROM [Warehouse Imp]
+ WHERE {[Time].[Time_hierarchy].[Year].[2023], [Time].[Time_hierarchy].[Year].[2024]}
+

@@ -1,0 +1,10 @@
+use warehouse_imp;
+drop table Department;
+drop table Faculty;
+drop table Junk;
+Drop table Lecturer;
+drop table Major;
+drop table Performance;
+drop table Student;
+drop table Subject;
+drop table Time;
